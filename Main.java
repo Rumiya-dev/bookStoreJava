@@ -1,5 +1,6 @@
 package model;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import model.salesman;
@@ -22,6 +23,9 @@ static ArrayList<order> orders = new ArrayList<>();
 
 //программа начинает свою работу с этой главной функции
 public static void main(String[]args) {
+	/*
+	 * заполнение данными метода из массивов orders, books, customers, salesmans
+	 */
 	initData();//в первую очередь нужно перейти к части кода, где заполняются массивы данными
 	
 	String booksInfo = 
@@ -44,8 +48,80 @@ public static void main(String[]args) {
 		soldBookStr, 
 		bookAdditional.getGenre().name(),bookAdditional.getCount(),price));
 	}
+	
+	int age = 30;
+	String analyzeGenreStr = "Customer(s) before %d age choose genre %s";
+	System.out.println(String.format(analyzeGenreStr, 30, getMostPopularGenreLessThenAge(age)));
+	
+	String analyzeGenreStr2 = "Customer(s) after %d age choose genre %s";
+	System.out.println(String.format(analyzeGenreStr2, 30, getMostPopularGenreMoreThenAge( age )));
 }
 
+/*получить наиболее популярный жанр для заказчиков до
+ * возраста age
+ * age - требуемый возраст
+ * return жанр
+ */
+public static bookGenre getMostPopularGenreLessThenAge(int age) {
+	ArrayList<Long> customersIds = new ArrayList<>();
+	for(customer customer : customers) {
+		if(customer.getAge() < age) {
+			customersIds.add(customer.getId());
+		}
+	}
+	
+	return extracted(customersIds);
+}
+
+
+/*получить наиболее популярный жанр для заказчиков старше age
+ * возраста age
+ * age - требуемый возраст
+ * return жанр
+ */
+public static bookGenre getMostPopularGenreMoreThenAge(int age) {
+	ArrayList<Long> customersIds = new ArrayList<>();
+	for(customer customer : customers) {
+		if(customer.getAge() > age) {
+			customersIds.add(customer.getId());
+		}
+	}
+	
+	return extracted(customersIds);
+}
+
+
+/*расчет наиболее популярных жанров книг для клиетов для методов, которые определяют популярные жанры для разных возрастов
+ * 
+ */
+private static bookGenre extracted(ArrayList<Long> getMostPopularBookGenre) {
+	int countArt = 0;
+	int countProgr = 0;
+	int countPsych = 0;
+	
+	for(order order : orders) {
+		if(getMostPopularBookGenre.contains(order.getCustomerId())) {
+			 countArt += getCountOfSoldBooksByGenre(order, bookGenre.Art);
+			 countProgr += getCountOfSoldBooksByGenre(order, bookGenre.Programming);
+			 countPsych += getCountOfSoldBooksByGenre(order, bookGenre.Psychology);
+		}
+	}
+	ArrayList<BookAdditional> result = new ArrayList<>();
+	result.add(new BookAdditional(bookGenre.Art, countArt));
+	result.add(new BookAdditional(bookGenre.Programming, countProgr));
+	result.add(new BookAdditional(bookGenre.Art, countPsych));
+	
+	 result.sort(new Comparator<BookAdditional>() {
+
+		@Override
+		public int compare(BookAdditional left, BookAdditional right) {
+			
+			return right.getCount() - left.getCount();//сортировка массива по убыванию
+		}
+		 
+	 });
+	return result.get(0).getGenre();//get(0) - это первый элемент отсортированого по убыванию массива
+}
 
 
 //получить количество проданных книг по жанрам
@@ -199,10 +275,10 @@ public static void initData(){
     books.add(new book(6, "C++ start", "Zinich Roman", 1100, bookGenre.Programming));
 
     //заказы
-    orders.add(new order(1, 2, 3, new long[]{4, 6, 4}));//продавец под №2 продал книги с номерами 
+    orders.add(new order(1, 2, 1, new long[]{6, 6, 6}));//продавец под №2 продал книги с номерами 
     //4, 6, 4 покупателю под №3, номер заказа 1
-    orders.add(new order(2, 2, 2, new long[]{2, 3, 4}));
-    orders.add(new order(3, 3, 3, new long[]{4, 5, 6}));
+    orders.add(new order(2, 2, 2, new long[]{6, 6, 6}));
+    orders.add(new order(3, 3, 2, new long[]{6, 6, 6}));
 
 }
 
